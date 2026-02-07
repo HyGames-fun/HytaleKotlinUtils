@@ -1,5 +1,5 @@
 {
-    "Group": "XFunHyGames",
+    "Group": "HyGames",
     "Name": "HytaleKotlinUtils",
     "Version": "0.0.1",
     "Description": "Kotlin utils for Hytale",
@@ -16,6 +16,6 @@
     ],
     "ServerVersion": "*",
     "DisabledByDefault": false,
-    "Main": "xfun.hygames.kotlinutils.HytaleKotlinUtils",
+    "Main": "fun.hygames.kotlinutils.HytaleKotlinUtils",
     "IncludesAssetPack": true
 }

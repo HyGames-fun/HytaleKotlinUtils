@@ -7,7 +7,7 @@ plugins {
     id("com.gradleup.shadow") version "9.3.1"
 }
 
-group = "xfun.hygames"
+group = "fun.hygames"
 version = "1.0-SNAPSHOT"
 
 val hytaleHome = properties["hytaleHome"]
