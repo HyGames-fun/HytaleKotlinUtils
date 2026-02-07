@@ -1,0 +1,21 @@
+{
+    "Group": "XFunHyGames",
+    "Name": "HytaleKotlinUtils",
+    "Version": "0.0.1",
+    "Description": "Kotlin utils for Hytale",
+    "Authors": [
+      {
+        "Name": "DSL"
+      },
+      {
+        "Name": "LionPa"
+      },
+      {
+        "Name": "hiword9"
+      }
+    ],
+    "ServerVersion": "*",
+    "DisabledByDefault": false,
+    "Main": "xfun.hygames.kotlinutils.HytaleKotlinUtils",
+    "IncludesAssetPack": true
+}
