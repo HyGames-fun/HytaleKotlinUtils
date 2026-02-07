@@ -1,7 +1,7 @@
 {
     "Group": "HyGames",
     "Name": "HytaleKotlinUtils",
-    "Version": "0.0.1",
+    "Version": "1.0.0",
     "Description": "Kotlin utils for Hytale",
     "Authors": [
       {
