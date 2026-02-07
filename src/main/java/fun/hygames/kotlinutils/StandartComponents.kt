@@ -1,4 +1,4 @@
-package xfun.hygames.kotlinutils
+package `fun`.hygames.kotlinutils
 
 import com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent
 import com.hypixel.hytale.server.core.entity.entities.Player

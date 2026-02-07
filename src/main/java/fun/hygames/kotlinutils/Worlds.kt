@@ -1,4 +1,4 @@
-package xfun.hygames.kotlinutils
+package `fun`.hygames.kotlinutils
 
 import com.hypixel.hytale.server.core.universe.Universe
 import com.hypixel.hytale.server.core.universe.world.World

@@ -1,4 +1,4 @@
-package xfun.hygames.kotlinutils
+package `fun`.hygames.kotlinutils
 
 import com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect
 
