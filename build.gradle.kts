@@ -17,6 +17,10 @@ val loadUserMods = properties["load_user_mods"]
 
 repositories {
     mavenCentral()
+    maven {
+        name = "hytale"
+        url = uri("https://maven.hytale.com/release")
+    }
 }
 
 configurations {
@@ -42,7 +46,7 @@ val libraries = listOf(
 )
 
 dependencies {
-    compileOnly(files("${hytaleHome}/install/${patchline}/package/game/latest/Server/HytaleServer.jar"))
+    compileOnly("com.hypixel.hytale:Server:+")
     libraries.forEach {
         implementation(it)
         shadow(it)
