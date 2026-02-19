@@ -9,9 +9,11 @@ import javax.annotation.Nonnull
 
 class HytaleKotlinUtils(@Nonnull init: JavaPluginInit) : JavaPlugin(init) {
     override fun setup() {
-        PluginsCounter.countJarsWithCodeInitializer(dataDirectory.parent.toFile())
+        val countOfPlugins = PluginsCounter.countPlugins(identifier) + 1 // + 1 Because HytaleKotlinUtils using HytaleKotlinUtils, but cant count self
 
-        CodeInitializer.addPlugin("fun.hygames.kotlinutils", HytaleKotlinUtils::class.java)
+        CodeInitializer.setPluginsCount(countOfPlugins)
+
+        CodeInitializer.addPlugin(this)
     }
 
     companion object {

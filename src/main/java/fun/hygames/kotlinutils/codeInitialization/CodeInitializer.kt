@@ -1,6 +1,7 @@
 package `fun`.hygames.kotlinutils.codeInitialization
 
 import com.google.common.reflect.ClassPath
+import com.hypixel.hytale.server.core.plugin.JavaPlugin
 import `fun`.hygames.kotlinutils.codeInitialization.typeProcessor.TypeProcessors
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
 
@@ -17,6 +18,12 @@ object CodeInitializer {
 
     private val nodes = HashMap<String, RunNode>()
 
+    fun <T : JavaPlugin> addPlugin(plugin: T) {
+        println(plugin::class.java.packageName)
+
+        addPlugin(plugin::class.java.packageName, plugin::class.java)
+    }
+
     fun addPlugin(packageName: String, pluginClass: Class<*>){
         registeredPlugins++
 
@@ -24,6 +31,10 @@ object CodeInitializer {
         pluginClasses.add(pluginClass)
 
         if (registeredPlugins >= plugins) initialize()
+    }
+
+    fun setPluginsCount(count: Int){
+        plugins = count
     }
 
     private fun initialize(){
