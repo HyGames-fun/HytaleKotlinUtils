@@ -4,6 +4,8 @@ import com.hypixel.hytale.server.core.NameMatching
 import com.hypixel.hytale.server.core.universe.PlayerRef
 import com.hypixel.hytale.server.core.universe.Universe
 import com.hypixel.hytale.server.core.universe.world.World
+import `fun`.hygames.kotlinutils.codeInitialization.Run
+import `fun`.hygames.kotlinutils.codeInitialization.RunOn
 import java.util.*
 
 object Players {

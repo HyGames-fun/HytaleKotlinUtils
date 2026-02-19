@@ -42,7 +42,8 @@ val libraries = listOf(
     "org.jetbrains.kotlinx:atomicfu-jvm:0.29.0",
     "org.jetbrains.kotlinx:kotlinx-datetime-jvm:0.7.1",
     "org.jetbrains.kotlinx:kotlinx-io-core-jvm:0.8.2",
-    "org.jetbrains.kotlinx:kotlinx-io-bytestring-jvm:0.8.2"
+    "org.jetbrains.kotlinx:kotlinx-io-bytestring-jvm:0.8.2",
+    "com.google.guava:guava:32.1.2-jre"
 )
 
 dependencies {
