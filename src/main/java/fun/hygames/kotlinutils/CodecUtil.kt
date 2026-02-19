@@ -6,7 +6,6 @@ import com.hypixel.hytale.codec.KeyedCodec
 import com.hypixel.hytale.codec.builder.BuilderCodec
 import com.hypixel.hytale.codec.builder.BuilderField
 import com.hypixel.hytale.function.consumer.TriConsumer
-import kotlinx.serialization.Required
 import java.util.function.BiConsumer
 import java.util.function.BiFunction
 import java.util.function.Function
