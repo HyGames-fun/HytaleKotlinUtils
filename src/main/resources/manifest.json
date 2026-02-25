@@ -14,7 +14,7 @@
         "Name": "hiword9"
       }
     ],
-    "ServerVersion": "*",
+    "ServerVersion": "2026.02.19-1a311a592",
     "DisabledByDefault": false,
     "Main": "fun.hygames.kotlinutils.HytaleKotlinUtils",
     "IncludesAssetPack": true
