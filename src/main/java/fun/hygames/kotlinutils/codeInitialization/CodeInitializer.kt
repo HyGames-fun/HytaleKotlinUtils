@@ -1,9 +1,13 @@
 package `fun`.hygames.kotlinutils.codeInitialization
 
 import com.google.common.reflect.ClassPath
+import com.hypixel.hytale.event.IAsyncEvent
+import com.hypixel.hytale.event.IBaseEvent
 import com.hypixel.hytale.server.core.plugin.JavaPlugin
+import `fun`.hygames.kotlinutils.Scheduler
+import `fun`.hygames.kotlinutils.codeInitialization.CodeInitializerUtil.ktInvoke
 import `fun`.hygames.kotlinutils.codeInitialization.typeProcessor.TypeProcessors
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
+import java.lang.reflect.Method
 
 object CodeInitializer {
 
@@ -11,24 +15,16 @@ object CodeInitializer {
     private var registeredPlugins : Int = 0
 
     private val packages = HashSet<String>()
-    private val pluginClasses = HashSet<Class<*>>()
 
-    private val startNode = RunNode(RunOn.START, 0, "", null, Int2ObjectOpenHashMap())
-    private val stopNode = RunNode(RunOn.STOP, 0, "", null, Int2ObjectOpenHashMap())
-
-    private val nodes = HashMap<String, RunNode>()
+    private val pluginInstances = ArrayList<JavaPlugin>()
+    val pluginsData = HashMap<JavaPlugin, PluginData>()
 
     fun <T : JavaPlugin> addPlugin(plugin: T) {
-        println(plugin::class.java.packageName)
-
-        addPlugin(plugin::class.java.packageName, plugin::class.java)
-    }
-
-    fun addPlugin(packageName: String, pluginClass: Class<*>){
         registeredPlugins++
 
-        packages.add(packageName)
-        pluginClasses.add(pluginClass)
+        pluginInstances.add(plugin)
+        pluginsData[plugin] = PluginData()
+        packages.add(plugin::class.java.packageName)
 
         if (registeredPlugins >= plugins) initialize()
     }
@@ -39,87 +35,123 @@ object CodeInitializer {
 
     private fun initialize(){
         println("Initializing...")
-        val classInfos = HashSet<ClassPath.ClassInfo>()
+        val classesOfPlugins = Array<ArrayList<Class<*>>>(pluginInstances.size) { ArrayList() } // Plugins -> Classes of plugin
 
         try {
-            for (clazz in pluginClasses) {
+            for (i in 0..<pluginInstances.size) {
+                val plugin = pluginInstances[i]
+                val classes = classesOfPlugins[i]
+
+                println("Loading classes for ${plugin.name}" )
+
                 // TODO Optimize
-                println("Loading classes for ${clazz.simpleName}" )
-                classInfos.addAll(ClassPath.from(clazz.classLoader).allClasses)
+                ClassPath.from(plugin::class.java.classLoader).allClasses
+                    .filter { info -> packageHas(info.packageName) }
+                    .forEach { classes.add(it.load()) }
             }
 
-            for (info in classInfos){
-                if (!collectionHas(packages, info.packageName)) continue
+            for (i in 0..<pluginInstances.size){
+                val plugin = pluginInstances[i]
 
-                val clazz: Class<*> = info.load()
-
-                processRegister(clazz)
-                processRun(clazz)
+                for (clazz in classesOfPlugins[i]) {
+                    processRegister(clazz, plugin)
+                    processRun(clazz, plugin)
+                    processEvents(clazz, plugin)
+                }
             }
 
-            println("Linking noes...")
-            linkNodes()
+            println("Linking nodes...")
+            RunNodeManager.linkNodes()
 
             println("Run nodes...")
-            startNode.run()
+            RunNodeManager.startNode.run()
 
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
-    private fun processRegister(clazz: Class<*>){
+    private fun processRegister(clazz: Class<*>, plugin: JavaPlugin){
         val register = clazz.getAnnotation(Register::class.java) ?: return
 
         if (register.type.isBlank()) return
 
         val processor = TypeProcessors[register.type] ?: return
 
-        processor.run(register, clazz)
+        processor.run(register, plugin, clazz)
     }
 
-    private fun processRun(clazz: Class<*>){
+    private fun processRun(clazz: Class<*>, plugin: JavaPlugin){
         for (method in clazz.methods) {
             val run = method.getAnnotation(Run::class.java) ?: continue
 
-            println(method.name)
-
             method.isAccessible = true
 
-            val node = RunNode(run.on, run.priority, run.after, method, Int2ObjectOpenHashMap())
+            val after = run.after.ifBlank { null }
+
+            val node = RunNode(plugin, run.on, run.priority, after, method)
             val nodeName = run.name.ifBlank { clazz.getSimpleName() + ":" + method.name }
 
-            nodes[nodeName] = node
+            RunNodeManager.nodes[nodeName] = node
         }
     }
 
-    private fun linkNodes() {
-        for (node in nodes.values) {
-            if (node.runOn == RunOn.TEST) continue
+    private fun processEvents(clazz: Class<*>, plugin: JavaPlugin){
+        for (method in clazz.methods) {
+            val eventAnnotation = method.getAnnotation(Event::class.java) ?: continue
 
-            var parentNode = when (node.runOn) {
-                RunOn.START -> startNode
-                RunOn.STOP -> stopNode
+            val param = method.parameterTypes[0]
+
+            if (param.isNestmateOf(IBaseEvent::class.java)) return
+
+            val eventClass = param as Class<IBaseEvent<Any>>
+
+            if (eventAnnotation.async) {
+                processEventsAsync(eventAnnotation, plugin, method, param as Class<IAsyncEvent<Any>>)
+            } else {
+                processEventsSync(eventAnnotation, plugin, method, eventClass)
             }
-
-            if (node.after.isNotBlank()) {
-                val afterNode = nodes[node.after]
-                if (afterNode != null) parentNode = afterNode
-            }
-
-            if (!parentNode.subNodes.containsKey(node.priority)){
-                parentNode.subNodes[node.priority] = ArrayList()
-            }
-
-            parentNode.subNodes[node.priority].add(node)
-
         }
     }
 
-    private fun collectionHas(collection: MutableCollection<String>, string: String): Boolean {
-        for (s in collection) {
+    private fun processEventsSync(eventAnnotation : Event, plugin: JavaPlugin, method: Method, eventClass: Class<IBaseEvent<Any>>){
+        when (eventAnnotation.type) {
+            EventType.GLOBAL -> plugin.eventRegistry.registerGlobal(eventAnnotation.priority, eventClass) { event ->
+                println(event::class.java.simpleName)
+                println(method.parameterTypes.contentToString())
+                method.ktInvoke(event)
+            }
+            EventType.KEYED -> {
+                if (eventAnnotation.key.isBlank())
+                    plugin.eventRegistry.register(eventAnnotation.priority, eventClass) { event -> method.ktInvoke(event) }
+                else
+                    plugin.eventRegistry.register(eventAnnotation.priority, eventClass, eventAnnotation.key) { event -> method.ktInvoke(event) }
+            }
+            EventType.UNHANDLED -> plugin.eventRegistry.registerUnhandled(eventAnnotation.priority, eventClass) { event -> method.ktInvoke(event) }
+        }
+    }
+
+    private fun processEventsAsync(eventAnnotation : Event, plugin: JavaPlugin, method: Method, eventClass: Class<IAsyncEvent<Any>>){
+        when (eventAnnotation.type) {
+            EventType.GLOBAL -> plugin.eventRegistry.registerAsyncGlobal(eventAnnotation.priority, eventClass) { event -> event }
+            EventType.KEYED -> {
+                if (eventAnnotation.key.isBlank())
+                    plugin.eventRegistry.register(eventAnnotation.priority, eventClass) { event -> method.invoke(event) }
+                else
+                    plugin.eventRegistry.register(eventAnnotation.priority, eventClass, eventAnnotation.key) { event -> method.invoke(event) }
+            }
+            EventType.UNHANDLED -> plugin.eventRegistry.registerUnhandled(eventAnnotation.priority, eventClass) { event -> method.invoke(event) }
+        }
+    }
+
+    private fun packageHas(string: String): Boolean {
+        for (s in packages) {
             if (string.contains(s)) return true
         }
         return false
+    }
+
+    class PluginData {
+        var scheduler: Scheduler? = null
     }
 }

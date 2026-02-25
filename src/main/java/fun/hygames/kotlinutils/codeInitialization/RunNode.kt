@@ -1,19 +1,25 @@
 package `fun`.hygames.kotlinutils.codeInitialization
 
+import com.hypixel.hytale.server.core.plugin.JavaPlugin
+import `fun`.hygames.kotlinutils.Scheduler
+import `fun`.hygames.kotlinutils.codeInitialization.CodeInitializerUtil.ktInvoke
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
 import java.lang.reflect.Method
-import java.lang.reflect.Modifier
 
 data class RunNode(
+    val plugin: JavaPlugin?,
     val runOn: RunOn,
     val priority: Int,
-    val after: String,
+    val after: String?,
 
     val method : Method?,
-    val subNodes: Int2ObjectOpenHashMap<ArrayList<RunNode>>
 ) {
-    fun run(){
-        val sorted = ArrayList(subNodes.keys)
+
+    var subNodes: Int2ObjectOpenHashMap<ArrayList<RunNode>>? = null
+
+    fun run() {
+        if (subNodes == null) return
+        val sorted = ArrayList(subNodes!!.keys)
 
         sorted.sort()
 
@@ -31,24 +37,57 @@ data class RunNode(
         }
     }
 
-    private fun runMethods(priorityIndex: Int){
-        for (subNode in subNodes[priorityIndex]) {
+    private fun runMethods(priorityIndex: Int) {
+        if (subNodes == null) return
+        for (subNode in subNodes!![priorityIndex]) {
             if (subNode.method == null) continue
 
             try {
-                if (Modifier.isStatic(subNode.method.modifiers)) {
-                    subNode.method.invoke(null)
-                } else {
-                    subNode.method.invoke(subNode.method.declaringClass.kotlin.objectInstance)
-                }
+                invokeMethodWithInjection(subNode)
             } catch (e: Exception) {
                 println(subNode.method.declaringClass.getSimpleName() + ":" + subNode.method.name)
                 e.printStackTrace()
             }
         }
 
-        for (subNode in subNodes[priorityIndex]){
+        for (subNode in subNodes!![priorityIndex]) {
             subNode.run()
+        }
+    }
+
+    fun addSubNode(node: RunNode){
+        subNodes = Int2ObjectOpenHashMap()
+
+        if (!subNodes!!.containsKey(node.priority)){
+            subNodes!![node.priority] = ArrayList()
+        }
+
+        subNodes!![node.priority].add(node)
+    }
+
+    val pluginData : CodeInitializer.PluginData
+        get() = CodeInitializer.pluginsData[plugin]!!
+
+    companion object {
+        private fun invokeMethodWithInjection(runNode: RunNode) {
+            if (runNode.plugin == null) return
+            if (runNode.method == null) return
+
+            val method = runNode.method
+
+            val args = Array<Any?>(method.parameterCount) { _ -> null }
+
+            val parameters = method.parameters
+            val parametersTypes = method.parameterTypes
+
+            for (i in 0..<parameters.size){
+                val type = parametersTypes[i]
+                val di = DependencyInjectionManager.dependencyInjectionByParameterClass[type] ?: continue
+
+                args[i] = di.inject(runNode, parameters[i])
+            }
+
+            method.ktInvoke(*args)
         }
     }
 }
