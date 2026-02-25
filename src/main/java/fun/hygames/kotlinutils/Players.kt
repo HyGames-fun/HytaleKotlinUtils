@@ -1,11 +1,10 @@
 package `fun`.hygames.kotlinutils
 
+import com.hypixel.hytale.server.core.Message
 import com.hypixel.hytale.server.core.NameMatching
 import com.hypixel.hytale.server.core.universe.PlayerRef
 import com.hypixel.hytale.server.core.universe.Universe
 import com.hypixel.hytale.server.core.universe.world.World
-import `fun`.hygames.kotlinutils.codeInitialization.Run
-import `fun`.hygames.kotlinutils.codeInitialization.RunOn
 import java.util.*
 
 object Players {
@@ -28,6 +27,10 @@ val PlayerRef.world : World?
 
         return Universe.get().getWorld(this.worldUuid!!)
     }
+
+fun PlayerRef.sendMessage(message: String){
+    sendMessage(Message.raw(message))
+}
 
 inline operator fun PlayerRef.invoke(crossinline body : (World) -> Unit){
     val world = this.world ?: return
