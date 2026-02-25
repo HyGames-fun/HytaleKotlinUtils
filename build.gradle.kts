@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "fun.hygames"
-version = "1.0.2"
+version = "1.1.0"
 
 val hytaleHome = properties["hytaleHome"]
 val patchline = properties["patchline"]
