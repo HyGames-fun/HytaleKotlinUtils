@@ -26,10 +26,6 @@ class HytaleKotlinUtils(@Nonnull init: JavaPluginInit) : JavaPlugin(init) {
         CodeInitializer.addPlugin(this)
 
         eventRegistry.register(ShutdownEvent::class.java, ::shutdown)
-
-        for (i in 0..10000){
-            println(Options.getOptionSet().asMap())
-        }
     }
 
     fun shutdown(event: ShutdownEvent){
