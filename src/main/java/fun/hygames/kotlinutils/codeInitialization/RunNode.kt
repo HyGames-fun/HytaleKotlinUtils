@@ -75,6 +75,11 @@ data class RunNode(
 
             val method = runNode.method
 
+            if (method.parameterCount == 0){
+                method.ktInvoke()
+                return
+            }
+
             val args = Array<Any?>(method.parameterCount) { _ -> null }
 
             val parameters = method.parameters
