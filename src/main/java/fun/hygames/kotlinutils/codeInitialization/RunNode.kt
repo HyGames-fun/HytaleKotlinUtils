@@ -1,13 +1,9 @@
 package `fun`.hygames.kotlinutils.codeInitialization
 
-import com.hypixel.hytale.logger.HytaleLogger
 import com.hypixel.hytale.server.core.plugin.JavaPlugin
 import `fun`.hygames.kotlinutils.HytaleKotlinUtils
-import `fun`.hygames.kotlinutils.Scheduler
 import `fun`.hygames.kotlinutils.codeInitialization.CodeInitializerUtil.ktInvoke
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
-import java.lang.invoke.MethodHandle
-import java.lang.invoke.MethodHandles
 import java.lang.reflect.Method
 import java.util.logging.Level
 

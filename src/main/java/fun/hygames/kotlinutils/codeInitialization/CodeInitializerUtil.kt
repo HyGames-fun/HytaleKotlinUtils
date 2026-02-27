@@ -1,13 +1,7 @@
 package `fun`.hygames.kotlinutils.codeInitialization
 
-import `fun`.hygames.kotlinutils.HytaleKotlinUtils
-import java.lang.invoke.MethodHandle
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
-import java.util.Arrays
-import java.util.logging.Level
-import kotlin.reflect.full.createInstance
-import kotlin.reflect.jvm.kotlinFunction
 
 object CodeInitializerUtil {
 

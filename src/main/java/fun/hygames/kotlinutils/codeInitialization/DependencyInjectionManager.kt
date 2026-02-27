@@ -3,7 +3,6 @@ package `fun`.hygames.kotlinutils.codeInitialization
 import com.hypixel.hytale.server.core.plugin.JavaPlugin
 import `fun`.hygames.kotlinutils.Scheduler
 import java.lang.reflect.Parameter
-import java.util.HashMap
 import kotlin.reflect.KClass
 
 object DependencyInjectionManager {
