@@ -94,7 +94,6 @@ data class RunNode(
                     args[i] = di.inject(runNode, parameters[i])
                 }
 
-                println("KT INVOKE WITH ${args.contentToString()}")
                 method.ktInvoke(*args)
             } catch (exception: Exception){
                 HytaleKotlinUtils.logger.at(Level.SEVERE).log("Error in node method invoke. \n  Info Method: ${runNode.method!!.name},\n     Method Arguments: ${runNode.method.parameterTypes.map { a -> a.simpleName }.toList()}")
