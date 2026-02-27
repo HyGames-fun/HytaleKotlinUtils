@@ -6,6 +6,8 @@ import `fun`.hygames.kotlinutils.HytaleKotlinUtils
 import `fun`.hygames.kotlinutils.Scheduler
 import `fun`.hygames.kotlinutils.codeInitialization.CodeInitializerUtil.ktInvoke
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
+import java.lang.invoke.MethodHandle
+import java.lang.invoke.MethodHandles
 import java.lang.reflect.Method
 import java.util.logging.Level
 
@@ -15,7 +17,7 @@ data class RunNode(
     val priority: Int,
     val after: String?,
 
-    val method : Method?,
+    val method : Method?
 ) {
     var subNodes: Int2ObjectOpenHashMap<ArrayList<RunNode>>? = null
 
@@ -58,7 +60,8 @@ data class RunNode(
     }
 
     fun addSubNode(node: RunNode){
-        subNodes = Int2ObjectOpenHashMap()
+        if (subNodes == null)
+            subNodes = Int2ObjectOpenHashMap()
 
         if (!subNodes!!.containsKey(node.priority)){
             subNodes!![node.priority] = ArrayList()
@@ -95,6 +98,7 @@ data class RunNode(
                     args[i] = di.inject(runNode, parameters[i])
                 }
 
+                println("KT INVOKE WITH ${args.contentToString()}")
                 method.ktInvoke(*args)
             } catch (exception: Exception){
                 HytaleKotlinUtils.logger.at(Level.SEVERE).log("Error in node method invoke. \n  Info Method: ${runNode.method!!.name},\n     Method Arguments: ${runNode.method.parameterTypes.map { a -> a.simpleName }.toList()}")
