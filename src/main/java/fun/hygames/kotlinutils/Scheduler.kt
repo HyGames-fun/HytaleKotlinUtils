@@ -10,7 +10,6 @@ import kotlin.time.Duration
 import kotlin.time.DurationUnit
 
 class Scheduler(plugin: JavaPlugin) {
-
     val executor: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor(ThreadUtil.daemon(plugin.name+"Scheduler"));
 
     fun schedule(duration: Duration, runnable: Runnable) : ScheduledFuture<*> {
@@ -44,5 +43,4 @@ class Scheduler(plugin: JavaPlugin) {
     fun stop(){
         executor.shutdownNow()
     }
-
 }

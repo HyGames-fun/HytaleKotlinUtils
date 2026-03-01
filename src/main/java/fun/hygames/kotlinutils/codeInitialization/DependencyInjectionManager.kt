@@ -9,19 +9,19 @@ object DependencyInjectionManager {
     val dependencyInjectionByParameterClass = HashMap<Class<*>, ParameterDI>()
 
     init {
-        add(Scheduler::class) { node, parameter ->
+        register(Scheduler::class) { node, parameter ->
             val pluginData = node.pluginData
             if (pluginData.scheduler == null)
                 pluginData.scheduler = Scheduler(node.plugin!!)
-            return@add pluginData.scheduler
+            return@register pluginData.scheduler
         }
 
-        add(JavaPlugin::class) { node, parameter ->
-            return@add node.plugin
+        register(JavaPlugin::class) { node, parameter ->
+            return@register node.plugin
         }
     }
 
-    private fun add(clazz: KClass<*>, parameterDI: ParameterDI){
+    fun register(clazz: KClass<*>, parameterDI: ParameterDI){
         dependencyInjectionByParameterClass[clazz.java] = parameterDI
     }
 }
