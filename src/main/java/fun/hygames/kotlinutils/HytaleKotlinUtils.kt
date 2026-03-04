@@ -9,16 +9,16 @@ import `fun`.hygames.kotlinutils.codeInitialization.PluginsCounter
 import `fun`.hygames.kotlinutils.codeInitialization.RunNodeManager
 import `fun`.hygames.kotlinutils.codeInitialization.typeProcessor.CommandTypeProcessor
 import `fun`.hygames.kotlinutils.codeInitialization.typeProcessor.TypeProcessors
+import java.util.logging.Level
 import javax.annotation.Nonnull
 
 class HytaleKotlinUtils(@Nonnull init: JavaPluginInit) : JavaPlugin(init) {
     override fun setup() {
         val countOfPlugins = PluginsCounter.countPlugins(identifier) + 1 // + 1 Because HytaleKotlinUtils using HytaleKotlinUtils, but cant count self
 
-        println("Counted $countOfPlugins plugins")
+        infoLogger("Counted $countOfPlugins plugins")
 
         CodeInitializer.setPluginsCount(countOfPlugins)
-
 
         TypeProcessors.register("command", CommandTypeProcessor())
         CodeInitializer.addPlugin(this)
@@ -32,5 +32,6 @@ class HytaleKotlinUtils(@Nonnull init: JavaPluginInit) : JavaPlugin(init) {
 
     companion object {
         val logger = HytaleLogger.forEnclosingClass()
+        val infoLogger: HytaleLogger.Api = logger.atInfo()
     }
 }

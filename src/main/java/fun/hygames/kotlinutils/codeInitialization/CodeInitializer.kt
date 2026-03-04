@@ -4,9 +4,11 @@ import com.google.common.reflect.ClassPath
 import com.hypixel.hytale.event.IAsyncEvent
 import com.hypixel.hytale.event.IBaseEvent
 import com.hypixel.hytale.server.core.plugin.JavaPlugin
+import `fun`.hygames.kotlinutils.HytaleKotlinUtils.Companion.infoLogger
 import `fun`.hygames.kotlinutils.Scheduler
 import `fun`.hygames.kotlinutils.codeInitialization.CodeInitializerUtil.ktInvoke
 import `fun`.hygames.kotlinutils.codeInitialization.typeProcessor.TypeProcessors
+import `fun`.hygames.kotlinutils.invoke
 import java.lang.reflect.Method
 
 object CodeInitializer {
@@ -26,6 +28,7 @@ object CodeInitializer {
         pluginsData[plugin] = PluginData()
         packages.add(plugin::class.java.packageName)
 
+        infoLogger("Plugin ${plugin.name} added")
         if (registeredPlugins >= plugins) initialize()
     }
 
@@ -34,7 +37,8 @@ object CodeInitializer {
     }
 
     private fun initialize(){
-        println("Initializing...")
+        infoLogger("Initializing...")
+
         val classesOfPlugins = Array<ArrayList<Class<*>>>(pluginInstances.size) { ArrayList() } // Plugins -> Classes of plugin
 
         try {
@@ -42,12 +46,14 @@ object CodeInitializer {
                 val plugin = pluginInstances[i]
                 val classes = classesOfPlugins[i]
 
-                println("Loading classes for ${plugin.name}" )
+                infoLogger("Loading classes for ${plugin.name}...")
 
                 // TODO Optimize
                 ClassPath.from(plugin::class.java.classLoader).allClasses
                     .filter { info -> packageHas(info.packageName) }
                     .forEach { classes.add(it.load()) }
+
+                infoLogger("Loaded ${classes.size} classes in ${plugin.name}")
             }
 
             for (i in 0..<pluginInstances.size){
@@ -60,10 +66,10 @@ object CodeInitializer {
                 }
             }
 
-            println("Linking nodes...")
+            infoLogger("Linking nodes...")
             RunNodeManager.linkNodes()
 
-            println("Run nodes...")
+            infoLogger("Run nodes...")
             RunNodeManager.startNode.run()
 
         } catch (e: Exception) {
