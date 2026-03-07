@@ -4,7 +4,6 @@ import org.jetbrains.gradle.ext.settings
 plugins {
     id("org.jetbrains.gradle.plugin.idea-ext") version "1.4"
     kotlin("jvm") version "2.3.0"
-    `maven-publish`
 }
 
 group = "fun.hygames"
@@ -49,24 +48,8 @@ dependencies {
     }
 }
 
-publishing {
-    publications {
-        create<MavenPublication>("mavenLocal") {
-            groupId = "fun.hygames.kotlinutils"
-            artifactId = "HytaleKotlinUtils"
-            version = "dev"
-
-            from(components["java"])
-        }
-    }
-}
-
 tasks.test {
     useJUnitPlatform()
-}
-
-tasks.register("buildAndPublishToLocal") {
-    dependsOn("build", "publishToMavenLocal")
 }
 
 kotlin {
