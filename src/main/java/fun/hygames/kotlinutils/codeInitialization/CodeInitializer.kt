@@ -5,10 +5,14 @@ import com.hypixel.hytale.event.IAsyncEvent
 import com.hypixel.hytale.event.IBaseEvent
 import com.hypixel.hytale.server.core.plugin.JavaPlugin
 import `fun`.hygames.kotlinutils.HytaleKotlinUtils.Companion.infoLogger
+import `fun`.hygames.kotlinutils.HytaleKotlinUtils.Companion.logger
 import `fun`.hygames.kotlinutils.Scheduler
 import `fun`.hygames.kotlinutils.codeInitialization.CodeInitializerUtil.ktInvoke
+import `fun`.hygames.kotlinutils.codeInitialization.typeProcessor.MissingTypeProcessorException
 import `fun`.hygames.kotlinutils.codeInitialization.typeProcessor.TypeProcessors
+import `fun`.hygames.kotlinutils.internal.ReflectionUtils
 import `fun`.hygames.kotlinutils.invoke
+import java.lang.invoke.MethodHandle
 import java.lang.reflect.Method
 
 object CodeInitializer {
@@ -60,9 +64,13 @@ object CodeInitializer {
                 val plugin = pluginInstances[i]
 
                 for (clazz in classesOfPlugins[i]) {
-                    processRegister(clazz, plugin)
-                    processRun(clazz, plugin)
-                    processEvents(clazz, plugin)
+                    try {
+                        processRegister(clazz, plugin)
+                        processRun(clazz, plugin)
+                        processEvents(clazz, plugin)
+                    } catch (e: Exception){
+                        e.printStackTrace()
+                    }
                 }
             }
 
@@ -82,7 +90,7 @@ object CodeInitializer {
 
         if (register.type.isBlank()) return
 
-        val processor = TypeProcessors[register.type] ?: return
+        val processor = TypeProcessors[register.type] ?: throw MissingTypeProcessorException(register.type)
 
         processor.run(register, plugin, clazz)
     }
@@ -121,12 +129,10 @@ object CodeInitializer {
     }
 
     private fun processEventsSync(eventAnnotation : Event, plugin: JavaPlugin, method: Method, eventClass: Class<IBaseEvent<Any>>){
+        val consumer = ReflectionUtils.createConsumer(method, eventClass)
+
         when (eventAnnotation.type) {
-            EventType.GLOBAL -> plugin.eventRegistry.registerGlobal(eventAnnotation.priority, eventClass) { event ->
-                println(event::class.java.simpleName)
-                println(method.parameterTypes.contentToString())
-                method.ktInvoke(event)
-            }
+            EventType.GLOBAL -> plugin.eventRegistry.registerGlobal(eventAnnotation.priority, eventClass, consumer)
             EventType.KEYED -> {
                 if (eventAnnotation.key.isBlank())
                     plugin.eventRegistry.register(eventAnnotation.priority, eventClass) { event -> method.ktInvoke(event) }

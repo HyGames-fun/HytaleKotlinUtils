@@ -2,6 +2,7 @@ package `fun`.hygames.kotlinutils
 
 import com.hypixel.hytale.server.core.Message
 import com.hypixel.hytale.server.core.NameMatching
+import com.hypixel.hytale.server.core.entity.entities.Player
 import com.hypixel.hytale.server.core.universe.PlayerRef
 import com.hypixel.hytale.server.core.universe.Universe
 import com.hypixel.hytale.server.core.universe.world.World
@@ -29,6 +30,9 @@ val PlayerRef.world : World?
     }
 
 fun PlayerRef.sendMessage(message: String){
+    sendMessage(Message.raw(message))
+}
+fun Player.sendMessage(message: String){
     sendMessage(Message.raw(message))
 }
 
