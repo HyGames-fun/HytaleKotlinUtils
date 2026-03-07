@@ -3,6 +3,7 @@ package `fun`.hygames.kotlinutils.codeInitialization
 import com.hypixel.hytale.server.core.plugin.JavaPlugin
 import `fun`.hygames.kotlinutils.HytaleKotlinUtils
 import `fun`.hygames.kotlinutils.codeInitialization.CodeInitializerUtil.ktInvoke
+import `fun`.hygames.kotlinutils.internal.ErrorReport
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
 import java.lang.reflect.Method
 import java.util.logging.Level
@@ -96,8 +97,14 @@ data class RunNode(
 
                 method.ktInvoke(*args)
             } catch (exception: Exception){
-                HytaleKotlinUtils.logger.at(Level.SEVERE).log("Error in node method invoke. \n  Info Method: ${runNode.method!!.name},\n     Method Arguments: ${runNode.method.parameterTypes.map { a -> a.simpleName }.toList()}")
-                exception.printStackTrace()
+                if (exception.cause == null) {
+                    ErrorReport("Error in node method invoke. No cause. Probably, error in RunNode.invokeMethodWithInjection. Please, send feedback with logs")
+                    exception.printStackTrace()
+                    return
+                }
+                val element = exception.cause!!.stackTrace[0]
+                ErrorReport("Error in node method invoke. ${element.fileName}:${element.methodName}:${element.lineNumber}. Arguments: ${runNode.method!!.parameterTypes.map { type -> type.simpleName }.toList()}.")
+                exception.cause!!.printStackTrace()
             }
         }
     }

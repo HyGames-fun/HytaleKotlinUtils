@@ -48,14 +48,17 @@ object CodeInitializer {
         try {
             for (i in 0..<pluginInstances.size) {
                 val plugin = pluginInstances[i]
+                val pluginPackage = plugin::class.java.packageName
                 val classes = classesOfPlugins[i]
 
                 infoLogger("Loading classes for ${plugin.name}...")
 
                 // TODO Optimize
                 ClassPath.from(plugin::class.java.classLoader).allClasses
-                    .filter { info -> packageHas(info.packageName) }
+                    .filter { info -> packageHas(info.packageName, pluginPackage) }
                     .forEach { classes.add(it.load()) }
+
+                println(classes.toString())
 
                 infoLogger("Loaded ${classes.size} classes in ${plugin.name}")
             }
@@ -104,7 +107,7 @@ object CodeInitializer {
             val after = run.after.ifBlank { null }
 
             val node = RunNode(plugin, run.on, run.priority, after, method)
-            val nodeName = run.name.ifBlank { clazz.getSimpleName() + ":" + method.name }
+            val nodeName = run.name.ifBlank { plugin.name + ":" + clazz.getSimpleName() + ":" + method.name }
 
             RunNodeManager.nodes[nodeName] = node
         }
@@ -113,6 +116,7 @@ object CodeInitializer {
     private fun processEvents(clazz: Class<*>, plugin: JavaPlugin){
         for (method in clazz.methods) {
             val eventAnnotation = method.getAnnotation(Event::class.java) ?: continue
+            println("Registering ${method.name} in ${plugin.name}")
 
             val param = method.parameterTypes[0]
 
@@ -156,11 +160,8 @@ object CodeInitializer {
         }
     }
 
-    private fun packageHas(string: String): Boolean {
-        for (s in packages) {
-            if (string.contains(s)) return true
-        }
-        return false
+    private fun packageHas(string: String, pluginPackage: String): Boolean {
+        return string.contains(pluginPackage)
     }
 
     class PluginData {
