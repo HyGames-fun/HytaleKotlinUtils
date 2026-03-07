@@ -10,6 +10,7 @@ import `fun`.hygames.kotlinutils.Scheduler
 import `fun`.hygames.kotlinutils.codeInitialization.CodeInitializerUtil.ktInvoke
 import `fun`.hygames.kotlinutils.codeInitialization.typeProcessor.MissingTypeProcessorException
 import `fun`.hygames.kotlinutils.codeInitialization.typeProcessor.TypeProcessors
+import `fun`.hygames.kotlinutils.internal.ErrorReport
 import `fun`.hygames.kotlinutils.internal.ReflectionUtils
 import `fun`.hygames.kotlinutils.invoke
 import java.lang.invoke.MethodHandle
@@ -57,8 +58,6 @@ object CodeInitializer {
                 ClassPath.from(plugin::class.java.classLoader).allClasses
                     .filter { info -> packageHas(info.packageName, pluginPackage) }
                     .forEach { classes.add(it.load()) }
-
-                println(classes.toString())
 
                 infoLogger("Loaded ${classes.size} classes in ${plugin.name}")
             }
@@ -138,12 +137,14 @@ object CodeInitializer {
         when (eventAnnotation.type) {
             EventType.GLOBAL -> plugin.eventRegistry.registerGlobal(eventAnnotation.priority, eventClass, consumer)
             EventType.KEYED -> {
-                if (eventAnnotation.key.isBlank())
-                    plugin.eventRegistry.register(eventAnnotation.priority, eventClass) { event -> method.ktInvoke(event) }
-                else
-                    plugin.eventRegistry.register(eventAnnotation.priority, eventClass, eventAnnotation.key) { event -> method.ktInvoke(event) }
+                if (eventAnnotation.key.isBlank()) {
+                    ErrorReport("Used EventType.KEYED, without key. Use EventType.GLOBAL. ${method.javaClass.simpleName}:${method.name}")
+                    return
+                }
+
+                plugin.eventRegistry.register(eventAnnotation.priority, eventClass, eventAnnotation.key, consumer)
             }
-            EventType.UNHANDLED -> plugin.eventRegistry.registerUnhandled(eventAnnotation.priority, eventClass) { event -> method.ktInvoke(event) }
+            EventType.UNHANDLED -> plugin.eventRegistry.registerUnhandled(eventAnnotation.priority, eventClass, consumer)
         }
     }
 
