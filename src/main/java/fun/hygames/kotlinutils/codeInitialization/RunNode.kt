@@ -4,6 +4,7 @@ import com.hypixel.hytale.server.core.plugin.JavaPlugin
 import `fun`.hygames.kotlinutils.HytaleKotlinUtils
 import `fun`.hygames.kotlinutils.codeInitialization.CodeInitializerUtil.ktInvoke
 import `fun`.hygames.kotlinutils.internal.ErrorReport
+import it.unimi.dsi.fastutil.ints.Int2IntMaps
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
 import java.lang.reflect.Method
 import java.util.logging.Level
@@ -44,7 +45,7 @@ data class RunNode(
             if (subNode.method == null) continue
 
             try {
-                invokeMethodWithInjection(subNode)
+                invokeMethodWithInjection(subNode, emptyMap())
             } catch (e: Exception) {
                 println(subNode.method.declaringClass.getSimpleName() + ":" + subNode.method.name)
                 e.printStackTrace()
@@ -71,7 +72,7 @@ data class RunNode(
         get() = CodeInitializer.pluginsData[plugin]!!
 
     companion object {
-        private fun invokeMethodWithInjection(runNode: RunNode) {
+        fun invokeMethodWithInjection(runNode: RunNode, arguments: Map<String, Any>) {
             try {
                 if (runNode.plugin == null) return
                 if (runNode.method == null) return
@@ -92,7 +93,7 @@ data class RunNode(
                     val type = parametersTypes[i]
                     val di = DependencyInjectionManager.dependencyInjectionByParameterClass[type] ?: continue
 
-                    args[i] = di.inject(runNode, parameters[i])
+                    args[i] = di.inject(runNode, parameters[i], arguments)
                 }
 
                 method.ktInvoke(*args)
