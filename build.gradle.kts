@@ -4,6 +4,7 @@ import org.jetbrains.gradle.ext.settings
 plugins {
     id("org.jetbrains.gradle.plugin.idea-ext") version "1.4"
     kotlin("jvm") version "2.3.0"
+    id("com.gradleup.shadow") version "9.3.1"
 }
 
 group = "fun.hygames"
@@ -20,6 +21,10 @@ repositories {
         name = "hytale"
         url = uri("https://maven.hytale.com/release")
     }
+}
+
+configurations {
+    shadow
 }
 
 val kotlinLib = "org.jetbrains.kotlin:kotlin-stdlib:2.3.0"
@@ -45,6 +50,7 @@ dependencies {
     compileOnly("com.hypixel.hytale:Server:+")
     libraries.forEach {
         implementation(it)
+        shadow(it)
     }
 }
 
@@ -54,6 +60,14 @@ tasks.test {
 
 kotlin {
     jvmToolchain(25)
+}
+
+tasks.shadowJar {
+        archiveClassifier.set("")
+    }
+
+tasks.build {
+    dependsOn(tasks.shadowJar)
 }
 
 
