@@ -5,12 +5,14 @@ import com.hypixel.hytale.server.core.util.concurrent.ThreadUtil
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledFuture
+import java.util.concurrent.ScheduledThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 
 class Scheduler(plugin: JavaPlugin) {
-    val executor: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor(ThreadUtil.daemon(plugin.name+"Scheduler"));
+    val executor: ScheduledThreadPoolExecutor =
+        Executors.newSingleThreadScheduledExecutor(ThreadUtil.daemon(plugin.name+"Scheduler")) as ScheduledThreadPoolExecutor;
 
     fun schedule(duration: Duration, runnable: Runnable) : ScheduledFuture<*> {
         return executor.schedule(
