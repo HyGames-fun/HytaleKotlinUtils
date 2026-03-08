@@ -4,11 +4,9 @@ import com.hypixel.hytale.component.system.ISystem
 import com.hypixel.hytale.component.system.System
 import com.hypixel.hytale.server.core.plugin.JavaPlugin
 import com.hypixel.hytale.server.core.universe.world.storage.ChunkStore
-import com.hypixel.hytale.server.core.universe.world.storage.EntityStore
 import `fun`.hygames.kotlinutils.codeInitialization.Register
 import `fun`.hygames.kotlinutils.inheritsFrom
 import `fun`.hygames.kotlinutils.internal.ErrorReport
-import `fun`.hygames.kotlinutils.internal.ErrorReport.invoke
 import java.lang.reflect.Constructor
 
 class ChunkSystemTypeProcessor : TypeProcessor {

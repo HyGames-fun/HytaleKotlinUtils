@@ -5,15 +5,12 @@ import com.hypixel.hytale.event.IAsyncEvent
 import com.hypixel.hytale.event.IBaseEvent
 import com.hypixel.hytale.server.core.plugin.JavaPlugin
 import `fun`.hygames.kotlinutils.HytaleKotlinUtils.Companion.infoLogger
-import `fun`.hygames.kotlinutils.HytaleKotlinUtils.Companion.logger
 import `fun`.hygames.kotlinutils.Scheduler
-import `fun`.hygames.kotlinutils.codeInitialization.CodeInitializerUtil.ktInvoke
 import `fun`.hygames.kotlinutils.codeInitialization.typeProcessor.MissingTypeProcessorException
 import `fun`.hygames.kotlinutils.codeInitialization.typeProcessor.TypeProcessors
 import `fun`.hygames.kotlinutils.internal.ErrorReport
 import `fun`.hygames.kotlinutils.internal.ReflectionUtils
 import `fun`.hygames.kotlinutils.invoke
-import java.lang.invoke.MethodHandle
 import java.lang.reflect.Method
 
 object CodeInitializer {

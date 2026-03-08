@@ -11,7 +11,6 @@ import `fun`.hygames.kotlinutils.HytaleKotlinUtils
 import `fun`.hygames.kotlinutils.codeInitialization.typeProcessor.TypeProcessors
 import `fun`.hygames.kotlinutils.invoke
 import `fun`.hygames.kotlinutils.sendMessage
-import kotlin.collections.iterator
 
 class HKUTypeProcessorsCommand : AbstractPlayerCommand {
 

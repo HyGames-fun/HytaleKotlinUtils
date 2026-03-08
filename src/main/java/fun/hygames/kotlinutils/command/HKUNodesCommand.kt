@@ -8,8 +8,8 @@ import com.hypixel.hytale.server.core.universe.PlayerRef
 import com.hypixel.hytale.server.core.universe.world.World
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore
 import `fun`.hygames.kotlinutils.HytaleKotlinUtils
-import `fun`.hygames.kotlinutils.codeInitialization.dependecyInjection.Inject
 import `fun`.hygames.kotlinutils.codeInitialization.RunNodeManager
+import `fun`.hygames.kotlinutils.codeInitialization.dependecyInjection.Inject
 import `fun`.hygames.kotlinutils.invoke
 import `fun`.hygames.kotlinutils.sendMessage
 
