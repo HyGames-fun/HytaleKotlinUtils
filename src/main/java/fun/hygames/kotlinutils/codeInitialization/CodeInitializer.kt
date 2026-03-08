@@ -37,7 +37,7 @@ object CodeInitializer {
         if (registeredPlugins >= plugins) initialize()
     }
 
-    fun setPluginsCount(count: Int){
+    internal fun setPluginsCount(count: Int){
         plugins = count
     }
 
@@ -95,6 +95,14 @@ object CodeInitializer {
         val processor = TypeProcessors[register.type] ?: throw MissingTypeProcessorException(register.type)
 
         processor.run(register, plugin, clazz)
+
+        var list = TypeProcessors.registeredByTypeProcessor[register.type]
+        if (list == null) {
+            list = ArrayList()
+            TypeProcessors.registeredByTypeProcessor[register.type] = list
+        }
+
+        list.add(clazz)
     }
 
     private fun processRun(clazz: Class<*>, plugin: JavaPlugin){

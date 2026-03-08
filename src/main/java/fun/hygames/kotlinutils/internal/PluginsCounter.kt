@@ -1,4 +1,4 @@
-package `fun`.hygames.kotlinutils.codeInitialization
+package `fun`.hygames.kotlinutils.internal
 
 import com.hypixel.hytale.common.plugin.PluginIdentifier
 import com.hypixel.hytale.server.core.HytaleServer

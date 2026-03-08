@@ -8,7 +8,8 @@ class HKUCommand : AbstractCommandCollection {
 
     constructor() : super("hku", "Command for developers") {
         addSubCommand(HKUInvokeCommand())
-        addSubCommand(HKUNodes())
+        addSubCommand(HKUNodesCommand())
+        addSubCommand(HKUTypeProcessorsCommand())
     }
 
 }

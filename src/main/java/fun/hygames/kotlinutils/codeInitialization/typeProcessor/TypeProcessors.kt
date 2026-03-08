@@ -8,6 +8,8 @@ import `fun`.hygames.kotlinutils.invoke
 import java.util.logging.Level
 
 object TypeProcessors {
+    val registeredByTypeProcessor = HashMap<String, ArrayList<Class<*>>>()
+
     private val typeProcessorByName = HashMap<String, TypeProcessor>()
     private val pluginsByTypeProcessorName = HashMap<String, JavaPlugin>()
 
@@ -28,5 +30,9 @@ object TypeProcessors {
 
     operator fun get(name: String) : TypeProcessor? {
         return typeProcessorByName[name]
+    }
+
+    fun getPlugin(typeProcessor: String) : JavaPlugin? {
+        return pluginsByTypeProcessorName[typeProcessor]
     }
 }

@@ -2,19 +2,18 @@ package `fun`.hygames.kotlinutils.command
 
 import com.hypixel.hytale.component.Ref
 import com.hypixel.hytale.component.Store
-import com.hypixel.hytale.server.core.HytaleServer
 import com.hypixel.hytale.server.core.command.system.CommandContext
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayerCommand
 import com.hypixel.hytale.server.core.universe.PlayerRef
 import com.hypixel.hytale.server.core.universe.world.World
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore
 import `fun`.hygames.kotlinutils.HytaleKotlinUtils
-import `fun`.hygames.kotlinutils.codeInitialization.Inject
+import `fun`.hygames.kotlinutils.codeInitialization.dependecyInjection.Inject
 import `fun`.hygames.kotlinutils.codeInitialization.RunNodeManager
 import `fun`.hygames.kotlinutils.invoke
 import `fun`.hygames.kotlinutils.sendMessage
 
-class HKUNodes : AbstractPlayerCommand {
+class HKUNodesCommand : AbstractPlayerCommand {
     constructor() : super("nodes", "List of all nodes")
 
     override fun execute(

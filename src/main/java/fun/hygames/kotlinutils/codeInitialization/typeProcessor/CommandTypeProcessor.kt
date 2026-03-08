@@ -8,7 +8,6 @@ import java.lang.reflect.Constructor
 
 class CommandTypeProcessor : TypeProcessor {
     override fun run(register: Register, plugin: JavaPlugin, clazz: Class<*>) {
-
         if (!clazz.inheritsFrom(AbstractCommand::class.java)) {
             throw CommandTypeProcessorException(clazz)
         }

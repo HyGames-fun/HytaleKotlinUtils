@@ -53,7 +53,7 @@ class HKUInvokeCommand : AbstractPlayerCommand {
 
         args["_player"] = player
 
-        RunNode.invokeMethodWithInjection(node, args)
+        node.invokeWithInjection(args)
     }
 
     private fun parse(string: String) : Any {
