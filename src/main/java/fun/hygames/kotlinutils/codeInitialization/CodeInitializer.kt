@@ -5,14 +5,12 @@ import com.hypixel.hytale.event.IAsyncEvent
 import com.hypixel.hytale.event.IBaseEvent
 import com.hypixel.hytale.server.core.plugin.JavaPlugin
 import `fun`.hygames.kotlinutils.HytaleKotlinUtils.Companion.infoLogger
-import `fun`.hygames.kotlinutils.HytaleKotlinUtils.Companion.logger
 import `fun`.hygames.kotlinutils.Scheduler
-import `fun`.hygames.kotlinutils.codeInitialization.CodeInitializerUtil.ktInvoke
 import `fun`.hygames.kotlinutils.codeInitialization.typeProcessor.MissingTypeProcessorException
 import `fun`.hygames.kotlinutils.codeInitialization.typeProcessor.TypeProcessors
+import `fun`.hygames.kotlinutils.internal.ErrorReport
 import `fun`.hygames.kotlinutils.internal.ReflectionUtils
 import `fun`.hygames.kotlinutils.invoke
-import java.lang.invoke.MethodHandle
 import java.lang.reflect.Method
 
 object CodeInitializer {
@@ -36,7 +34,7 @@ object CodeInitializer {
         if (registeredPlugins >= plugins) initialize()
     }
 
-    fun setPluginsCount(count: Int){
+    internal fun setPluginsCount(count: Int){
         plugins = count
     }
 
@@ -48,13 +46,14 @@ object CodeInitializer {
         try {
             for (i in 0..<pluginInstances.size) {
                 val plugin = pluginInstances[i]
+                val pluginPackage = plugin::class.java.packageName
                 val classes = classesOfPlugins[i]
 
                 infoLogger("Loading classes for ${plugin.name}...")
 
                 // TODO Optimize
                 ClassPath.from(plugin::class.java.classLoader).allClasses
-                    .filter { info -> packageHas(info.packageName) }
+                    .filter { info -> packageHas(info.packageName, pluginPackage) }
                     .forEach { classes.add(it.load()) }
 
                 infoLogger("Loaded ${classes.size} classes in ${plugin.name}")
@@ -93,6 +92,14 @@ object CodeInitializer {
         val processor = TypeProcessors[register.type] ?: throw MissingTypeProcessorException(register.type)
 
         processor.run(register, plugin, clazz)
+
+        var list = TypeProcessors.registeredByTypeProcessor[register.type]
+        if (list == null) {
+            list = ArrayList()
+            TypeProcessors.registeredByTypeProcessor[register.type] = list
+        }
+
+        list.add(clazz)
     }
 
     private fun processRun(clazz: Class<*>, plugin: JavaPlugin){
@@ -104,7 +111,7 @@ object CodeInitializer {
             val after = run.after.ifBlank { null }
 
             val node = RunNode(plugin, run.on, run.priority, after, method)
-            val nodeName = run.name.ifBlank { clazz.getSimpleName() + ":" + method.name }
+            val nodeName = run.name.ifBlank { plugin.name + ":" + clazz.getSimpleName() + ":" + method.name }
 
             RunNodeManager.nodes[nodeName] = node
         }
@@ -113,6 +120,7 @@ object CodeInitializer {
     private fun processEvents(clazz: Class<*>, plugin: JavaPlugin){
         for (method in clazz.methods) {
             val eventAnnotation = method.getAnnotation(Event::class.java) ?: continue
+            println("Registering ${method.name} in ${plugin.name}")
 
             val param = method.parameterTypes[0]
 
@@ -129,17 +137,19 @@ object CodeInitializer {
     }
 
     private fun processEventsSync(eventAnnotation : Event, plugin: JavaPlugin, method: Method, eventClass: Class<IBaseEvent<Any>>){
-        val consumer = ReflectionUtils.createConsumer(method, eventClass)
+        val consumer = ReflectionUtils.createConsumer<IBaseEvent<Any>>(method)
 
         when (eventAnnotation.type) {
             EventType.GLOBAL -> plugin.eventRegistry.registerGlobal(eventAnnotation.priority, eventClass, consumer)
             EventType.KEYED -> {
-                if (eventAnnotation.key.isBlank())
-                    plugin.eventRegistry.register(eventAnnotation.priority, eventClass) { event -> method.ktInvoke(event) }
-                else
-                    plugin.eventRegistry.register(eventAnnotation.priority, eventClass, eventAnnotation.key) { event -> method.ktInvoke(event) }
+                if (eventAnnotation.key.isBlank()) {
+                    ErrorReport("Used EventType.KEYED, without key. Use EventType.GLOBAL. ${method.javaClass.simpleName}:${method.name}")
+                    return
+                }
+
+                plugin.eventRegistry.register(eventAnnotation.priority, eventClass, eventAnnotation.key, consumer)
             }
-            EventType.UNHANDLED -> plugin.eventRegistry.registerUnhandled(eventAnnotation.priority, eventClass) { event -> method.ktInvoke(event) }
+            EventType.UNHANDLED -> plugin.eventRegistry.registerUnhandled(eventAnnotation.priority, eventClass, consumer)
         }
     }
 
@@ -156,11 +166,8 @@ object CodeInitializer {
         }
     }
 
-    private fun packageHas(string: String): Boolean {
-        for (s in packages) {
-            if (string.contains(s)) return true
-        }
-        return false
+    private fun packageHas(string: String, pluginPackage: String): Boolean {
+        return string.contains(pluginPackage)
     }
 
     class PluginData {

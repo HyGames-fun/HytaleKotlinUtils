@@ -7,7 +7,9 @@ import java.lang.reflect.Method
 import java.util.function.Consumer
 
 object ReflectionUtils {
-    fun <T> createConsumer(method: Method, clazz: Class<T>) : Consumer<T>{
+
+    @Suppress("UNCHECKED_CAST")
+    fun <T> createConsumer(method: Method) : Consumer<T>{
         val lookup = MethodHandles.lookup()
 
         val handle = lookup.unreflect(method)
@@ -15,6 +17,7 @@ object ReflectionUtils {
         return createObjectConsumer(method, handle, method.parameterTypes[0]) as Consumer<T>
     }
 
+    @Suppress("UNCHECKED_CAST")
     private fun <T> createObjectConsumer(
         method: Method,
         handle: java.lang.invoke.MethodHandle,

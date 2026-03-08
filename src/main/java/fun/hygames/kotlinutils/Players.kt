@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package `fun`.hygames.kotlinutils
 
 import com.hypixel.hytale.server.core.Message

@@ -1,5 +1,8 @@
+@file:Suppress("unused")
+
 package `fun`.hygames.kotlinutils
 
+import com.hypixel.hytale.component.ComponentType
 import com.hypixel.hytale.server.core.entity.Frozen
 import com.hypixel.hytale.server.core.entity.UUIDComponent
 import com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent
@@ -20,8 +23,9 @@ import com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap
 import com.hypixel.hytale.server.core.modules.entitystats.asset.DefaultEntityStatTypes
 import com.hypixel.hytale.server.core.modules.physics.component.PhysicsValues
 import com.hypixel.hytale.server.core.modules.physics.component.Velocity
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore
 
-val TRANSFORM
+val TRANSFORM : ComponentType<EntityStore, TransformComponent>
     inline get() = TransformComponent.getComponentType()
 
 var TransformComponent.x : Double
