@@ -8,8 +8,12 @@ object PluginsCounter {
         var count = 0
 
         for (plugin in HytaleServer.get().pluginManager.plugins) {
-            if (plugin.manifest.dependencies.containsKey(identifier)) count++
-            else if (plugin.manifest.optionalDependencies.containsKey(identifier)) count++
+            val manifest = plugin.manifest
+
+            if (manifest.dependencies.containsKey(identifier))
+                count++
+            else if (manifest.optionalDependencies.containsKey(identifier))
+                count++
         }
 
         return count

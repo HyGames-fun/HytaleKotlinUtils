@@ -28,6 +28,4 @@ Try rewrite class to
     "class ${clazz.simpleName} : AbstractPlayerCommand",
     "class ${clazz.simpleName} : AbstractAsyncCommand",
     "class ${clazz.simpleName} : AbstractCommand"
-       """) {
-
-}
+       """)

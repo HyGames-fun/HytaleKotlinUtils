@@ -1,7 +1,7 @@
 package `fun`.hygames.kotlinutils.codeInitialization
 
 import com.hypixel.hytale.server.core.plugin.JavaPlugin
-import `fun`.hygames.kotlinutils.codeInitialization.CodeInitializerUtil.ktInvoke
+import `fun`.hygames.kotlinutils.internal.MethodUtil.ktInvoke
 import `fun`.hygames.kotlinutils.codeInitialization.dependecyInjection.DependencyInjectionManager
 import `fun`.hygames.kotlinutils.codeInitialization.dependecyInjection.Inject
 import `fun`.hygames.kotlinutils.codeInitialization.dependecyInjection.ParameterInjection

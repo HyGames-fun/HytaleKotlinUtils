@@ -137,7 +137,7 @@ object CodeInitializer {
     }
 
     private fun processEventsSync(eventAnnotation : Event, plugin: JavaPlugin, method: Method, eventClass: Class<IBaseEvent<Any>>){
-        val consumer = ReflectionUtils.createConsumer(method, eventClass)
+        val consumer = ReflectionUtils.createConsumer<IBaseEvent<Any>>(method)
 
         when (eventAnnotation.type) {
             EventType.GLOBAL -> plugin.eventRegistry.registerGlobal(eventAnnotation.priority, eventClass, consumer)

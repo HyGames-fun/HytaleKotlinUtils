@@ -28,10 +28,12 @@ class HKUTypeProcessorsCommand : AbstractPlayerCommand {
         for (entry in TypeProcessors.registeredByTypeProcessor){
             val plugin = TypeProcessors.getPlugin(entry.key)!!.name
 
-            if (classes[plugin] == null) classes[plugin] = HashMap()
-            classes[plugin]!![entry.key] = entry.value.stream().map { clazz ->
-                return@map clazz.simpleName
-            }.toList()
+            val typeProcessor = classes.computeIfAbsent(plugin) { HashMap() }
+
+            typeProcessor[entry.key] =
+                entry.value.stream()
+                    .map{ clazz -> clazz.simpleName }
+                    .toList()
         }
 
         val string = StringBuilder()

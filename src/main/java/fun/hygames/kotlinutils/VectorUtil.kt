@@ -1,8 +1,9 @@
+@file:Suppress("unused")
+
 package `fun`.hygames.kotlinutils
 
 import com.hypixel.hytale.math.vector.Vector3d
 import com.hypixel.hytale.math.vector.Vector3f
-
 
 fun vec3(x: Float, y: Float, z: Float) : Vector3f {
     return Vector3f(x, y, z)

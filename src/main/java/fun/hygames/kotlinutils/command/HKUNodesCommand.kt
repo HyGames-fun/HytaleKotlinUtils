@@ -12,6 +12,7 @@ import `fun`.hygames.kotlinutils.codeInitialization.RunNodeManager
 import `fun`.hygames.kotlinutils.codeInitialization.dependecyInjection.Inject
 import `fun`.hygames.kotlinutils.invoke
 import `fun`.hygames.kotlinutils.sendMessage
+import `fun`.hygames.kotlinutils.stringIfNotEmpty
 
 class HKUNodesCommand : AbstractPlayerCommand {
     constructor() : super("nodes", "List of all nodes")
@@ -28,7 +29,6 @@ class HKUNodesCommand : AbstractPlayerCommand {
         val nodes = HashMap<String, HashMap<String, ArrayList<String>>>() // Plugin -> Classes -> Nodes
 
         for (entry in RunNodeManager.nodes) {
-            println(entry)
             val node = entry.value
             val name = entry.key
             if (node.plugin == null || node.method == null) continue
@@ -36,23 +36,13 @@ class HKUNodesCommand : AbstractPlayerCommand {
             val plugin = node.plugin.name
             val clazz = node.method.declaringClass.simpleName
 
-            var map = nodes[plugin]
+            val classesToNodes = nodes.computeIfAbsent(plugin) { HashMap() }
 
-            if (map == null) {
-                map = HashMap()
-                nodes[plugin] = map
-            }
-
-            var list = map[clazz]
-
-            if (list == null){
-                list = ArrayList()
-                map[clazz] = list
-            }
+            val nodes = classesToNodes.computeIfAbsent(clazz) { ArrayList() }
 
             val invokeArguments = ArrayList<String>()
 
-            for (annotations in node.method.parameterAnnotations){
+            for (annotations in node.method.parameterAnnotations) {
                 for (annotation in annotations) {
                     if (annotation !is Inject) continue
                     if (annotation.name.isBlank()) continue
@@ -60,10 +50,7 @@ class HKUNodesCommand : AbstractPlayerCommand {
                 }
             }
 
-            if (invokeArguments.isEmpty())
-                list.add("$name, Params: ${node.method.parameterCount}")
-             else
-                list.add("$name, Params: ${node.method.parameterCount}, Args (${invokeArguments.joinToString()})")
+            nodes.add("$name, Params: ${node.method.parameterCount}${invokeArguments.stringIfNotEmpty { ", Args ${joinToString()}}" }}")
         }
 
         for (plugin in nodes) {

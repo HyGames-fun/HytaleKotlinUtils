@@ -11,7 +11,7 @@ import kotlin.time.DurationUnit
 
 class Scheduler(plugin: JavaPlugin) {
     val executor: ScheduledThreadPoolExecutor =
-        Executors.newSingleThreadScheduledExecutor(ThreadUtil.daemon(plugin.name+"Scheduler")) as ScheduledThreadPoolExecutor;
+        Executors.newSingleThreadScheduledExecutor(ThreadUtil.daemon(plugin.name+"Scheduler")) as ScheduledThreadPoolExecutor
 
     fun schedule(duration: Duration, runnable: Runnable) : ScheduledFuture<*> {
         return executor.schedule(

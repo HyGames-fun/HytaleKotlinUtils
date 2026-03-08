@@ -26,6 +26,7 @@ class HytaleKotlinUtils(@Nonnull init: JavaPluginInit) : JavaPlugin(init) {
         TypeProcessors.register("command", CommandTypeProcessor(), this)
         TypeProcessors.register("entity_system", EntitySystemTypeProcessor(), this)
         TypeProcessors.register("chunk_system", EntitySystemTypeProcessor(), this)
+
         CodeInitializer.addPlugin(this)
 
         eventRegistry.register(ShutdownEvent::class.java, ::shutdown)

@@ -11,6 +11,17 @@ object DependencyInjectionManager {
     private val dependencyInjectionByParameterClass = HashMap<Class<*>, ParameterInjection>()
     private val extraDependencyInjectionByInjector = HashMap<String, HashMap<Class<*>, ParameterInjection>>()
 
+    fun register(clazz: KClass<*>, parameterInjection: ParameterInjection){
+        dependencyInjectionByParameterClass[clazz.java] = parameterInjection
+    }
+
+    fun register(injector: String, clazz: KClass<*>, parameterInjection: ParameterInjection){
+        val map = extraDependencyInjectionByInjector[injector]
+        if (map == null) extraDependencyInjectionByInjector[injector] = HashMap()
+
+        extraDependencyInjectionByInjector[injector]!![clazz.java] = parameterInjection
+    }
+
     internal fun getParameterInjection(clazz: Class<*>, inject: Inject) : ParameterInjection? {
         if (inject.injector.isBlank())
             return dependencyInjectionByParameterClass[clazz]
@@ -24,19 +35,8 @@ object DependencyInjectionManager {
         return parameterInjection
     }
 
-    fun register(clazz: KClass<*>, parameterInjection: ParameterInjection){
-        dependencyInjectionByParameterClass[clazz.java] = parameterInjection
-    }
-
-    fun register(injector: String, clazz: KClass<*>, parameterInjection: ParameterInjection){
-        val map = extraDependencyInjectionByInjector[injector]
-        if (map == null) extraDependencyInjectionByInjector[injector] = HashMap()
-
-        extraDependencyInjectionByInjector[injector]!![clazz.java] = parameterInjection
-    }
-
     init {
-        register(Scheduler::class) { node, parameter, args ->
+        register(Scheduler::class) { node, _, _ ->
             val pluginData = node.pluginData
             if (pluginData.scheduler == null)
                 pluginData.scheduler = Scheduler(node.plugin!!)
