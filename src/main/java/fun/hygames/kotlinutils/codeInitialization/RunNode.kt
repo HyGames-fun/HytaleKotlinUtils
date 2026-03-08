@@ -1,11 +1,13 @@
 package `fun`.hygames.kotlinutils.codeInitialization
 
 import com.hypixel.hytale.server.core.plugin.JavaPlugin
-import `fun`.hygames.kotlinutils.HytaleKotlinUtils
-import `fun`.hygames.kotlinutils.codeInitialization.CodeInitializerUtil.ktInvoke
+import `fun`.hygames.kotlinutils.internal.MethodUtil.ktInvoke
+import `fun`.hygames.kotlinutils.codeInitialization.dependecyInjection.DependencyInjectionManager
+import `fun`.hygames.kotlinutils.codeInitialization.dependecyInjection.Inject
+import `fun`.hygames.kotlinutils.codeInitialization.dependecyInjection.ParameterInjection
+import `fun`.hygames.kotlinutils.internal.ErrorReport
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
 import java.lang.reflect.Method
-import java.util.logging.Level
 
 data class RunNode(
     val plugin: JavaPlugin?,
@@ -43,7 +45,7 @@ data class RunNode(
             if (subNode.method == null) continue
 
             try {
-                invokeMethodWithInjection(subNode)
+                subNode.invokeWithInjection(emptyMap())
             } catch (e: Exception) {
                 println(subNode.method.declaringClass.getSimpleName() + ":" + subNode.method.name)
                 e.printStackTrace()
@@ -55,7 +57,7 @@ data class RunNode(
         }
     }
 
-    fun addSubNode(node: RunNode){
+    internal fun addSubNode(node: RunNode){
         if (subNodes == null)
             subNodes = Int2ObjectOpenHashMap()
 
@@ -66,39 +68,65 @@ data class RunNode(
         subNodes!![node.priority].add(node)
     }
 
+    fun name() : String{
+        return plugin!!.name + ":" + method!!.declaringClass.simpleName + ":" + method.name
+    }
+
     val pluginData : CodeInitializer.PluginData
         get() = CodeInitializer.pluginsData[plugin]!!
 
-    companion object {
-        private fun invokeMethodWithInjection(runNode: RunNode) {
-            try {
-                if (runNode.plugin == null) return
-                if (runNode.method == null) return
+    internal fun invokeWithInjection(arguments: Map<String, Any>) {
+        if (plugin == null) return
+        if (method == null) return
 
-                val method = runNode.method
-
-                if (method.parameterCount == 0) {
-                    method.ktInvoke()
-                    return
-                }
-
-                val args = Array<Any?>(method.parameterCount) { _ -> null }
-
-                val parameters = method.parameters
-                val parametersTypes = method.parameterTypes
-
-                for (i in 0..<parameters.size) {
-                    val type = parametersTypes[i]
-                    val di = DependencyInjectionManager.dependencyInjectionByParameterClass[type] ?: continue
-
-                    args[i] = di.inject(runNode, parameters[i])
-                }
-
-                method.ktInvoke(*args)
-            } catch (exception: Exception){
-                HytaleKotlinUtils.logger.at(Level.SEVERE).log("Error in node method invoke. \n  Info Method: ${runNode.method!!.name},\n     Method Arguments: ${runNode.method.parameterTypes.map { a -> a.simpleName }.toList()}")
-                exception.printStackTrace()
-            }
+        if (method.parameterCount == 0) {
+            method.ktInvoke()
+            return
         }
+
+        val args = createArgs(method, arguments)
+
+        try {
+            method.ktInvoke(*args)
+        } catch (exception: Exception) {
+            if (exception.cause == null) {
+                ErrorReport("Error in node method invoke. No cause. Probably, error in RunNode.invokeMethodWithInjection. Please, send feedback with logs")
+                exception.printStackTrace()
+                return
+            }
+            val element = exception.cause!!.stackTrace[0]
+            ErrorReport(
+                "Error in node method invoke. ${element.fileName}:${element.methodName}:${element.lineNumber}. Arguments: ${
+                    method.parameterTypes.map { type -> type.simpleName }.toList()
+                }."
+            )
+            exception.cause!!.printStackTrace()
+        }
+    }
+
+    private fun createArgs(method: Method, arguments: Map<String, Any>) : Array<Any?> {
+        val args = arrayOfNulls<Any?>(method.parameterCount)
+
+        val parameters = method.parameters
+        val parametersTypes = method.parameterTypes
+
+        for (i in 0..<parameters.size) {
+            val type = parametersTypes[i]
+            val inject = parameters[i].getAnnotation(Inject::class.java)
+
+            var parameterInjection: ParameterInjection?
+
+            try {
+                 parameterInjection = DependencyInjectionManager.getParameterInjection(type, inject) ?: continue
+            } catch (e: Exception){
+                ErrorReport("Injection error in node ${name()}. Message: \"${e.message!!}\"")
+                e.printStackTrace()
+                continue
+            }
+
+            args[i] = parameterInjection.inject(this, parameters[i], arguments)
+        }
+
+        return args
     }
 }
