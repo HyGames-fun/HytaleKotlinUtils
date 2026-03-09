@@ -7,9 +7,8 @@ import com.hypixel.hytale.server.core.plugin.JavaPlugin
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit
 import `fun`.hygames.kotlinutils.codeInitialization.CodeInitializer
 import `fun`.hygames.kotlinutils.codeInitialization.RunNodeManager
-import `fun`.hygames.kotlinutils.codeInitialization.typeProcessor.CommandTypeProcessor
-import `fun`.hygames.kotlinutils.codeInitialization.typeProcessor.EntitySystemTypeProcessor
 import `fun`.hygames.kotlinutils.codeInitialization.typeProcessor.TypeProcessors
+import `fun`.hygames.kotlinutils.codeInitialization.typeProcessor.builtin.*
 import `fun`.hygames.kotlinutils.internal.ErrorReport
 import `fun`.hygames.kotlinutils.internal.PluginsCounter
 import javax.annotation.Nonnull
@@ -23,9 +22,9 @@ class HytaleKotlinUtils(@Nonnull init: JavaPluginInit) : JavaPlugin(init) {
 
         CodeInitializer.setPluginsCount(countOfPlugins)
 
-        TypeProcessors.register("command", CommandTypeProcessor(), this)
-        TypeProcessors.register("entity_system", EntitySystemTypeProcessor(), this)
-        TypeProcessors.register("chunk_system", EntitySystemTypeProcessor(), this)
+        TypeProcessors.register(COMMAND, CommandTypeProcessor(), this)
+        TypeProcessors.register(ENTITY_SYSTEM, EntitySystemTypeProcessor(), this)
+        TypeProcessors.register(CHUNK_SYSTEM, ChunkSystemTypeProcessor(), this)
 
         CodeInitializer.addPlugin(this)
 
