@@ -1,11 +1,10 @@
 package `fun`.hygames.kotlinutils.codeInitialization
 
 import com.hypixel.hytale.server.core.plugin.JavaPlugin
-import `fun`.hygames.kotlinutils.internal.MethodUtil.ktInvoke
 import `fun`.hygames.kotlinutils.codeInitialization.dependecyInjection.DependencyInjectionManager
 import `fun`.hygames.kotlinutils.codeInitialization.dependecyInjection.Inject
-import `fun`.hygames.kotlinutils.codeInitialization.dependecyInjection.ParameterInjection
 import `fun`.hygames.kotlinutils.internal.ErrorReport
+import `fun`.hygames.kotlinutils.internal.MethodUtil.ktInvoke
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
 import java.lang.reflect.Method
 
@@ -68,8 +67,10 @@ data class RunNode(
         subNodes!![node.priority].add(node)
     }
 
-    fun name() : String{
-        return plugin!!.name + ":" + method!!.declaringClass.simpleName + ":" + method.name
+    fun name() : String {
+        if (plugin == null) return ""
+        if (method == null) return ""
+        return plugin.name + ":" + method.declaringClass.simpleName + ":" + method.name
     }
 
     val pluginData : CodeInitializer.PluginData
@@ -114,19 +115,16 @@ data class RunNode(
             val type = parametersTypes[i]
             val inject = parameters[i].getAnnotation(Inject::class.java)
 
-            var parameterInjection: ParameterInjection?
-
-            try {
-                 parameterInjection = DependencyInjectionManager.getParameterInjection(type, inject) ?: continue
+            val parameterInjection = try {
+                DependencyInjectionManager.getParameterInjection(type, inject) ?: continue
             } catch (e: Exception){
-                ErrorReport("Injection error in node ${name()}. Message: \"${e.message!!}\"")
+                ErrorReport("Injection error in node ${name().ifBlank { "Undefined" }}. Message: \"${e.message}\"")
                 e.printStackTrace()
                 continue
             }
 
             args[i] = parameterInjection.inject(this, parameters[i], arguments)
         }
-
         return args
     }
 }

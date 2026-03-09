@@ -1,8 +1,9 @@
-package `fun`.hygames.kotlinutils.codeInitialization.typeProcessor
+package `fun`.hygames.kotlinutils.codeInitialization.typeProcessor.builtin
 
 import com.hypixel.hytale.server.core.command.system.AbstractCommand
 import com.hypixel.hytale.server.core.plugin.JavaPlugin
 import `fun`.hygames.kotlinutils.codeInitialization.Register
+import `fun`.hygames.kotlinutils.codeInitialization.typeProcessor.TypeProcessor
 import `fun`.hygames.kotlinutils.inheritsFrom
 import java.lang.reflect.Constructor
 
