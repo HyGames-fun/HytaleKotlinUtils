@@ -1,5 +1,6 @@
 package `fun`.hygames.kotlinutils.command
 
+import com.hypixel.hytale.codec.builder.StringTreeMap
 import com.hypixel.hytale.component.Ref
 import com.hypixel.hytale.component.Store
 import com.hypixel.hytale.server.core.command.system.CommandContext
@@ -7,9 +8,11 @@ import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayer
 import com.hypixel.hytale.server.core.universe.PlayerRef
 import com.hypixel.hytale.server.core.universe.world.World
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore
+import com.sun.source.tree.Tree
 import `fun`.hygames.kotlinutils.HytaleKotlinUtils
 import `fun`.hygames.kotlinutils.codeInitialization.RunNodeManager
 import `fun`.hygames.kotlinutils.codeInitialization.dependecyInjection.Inject
+import `fun`.hygames.kotlinutils.internal.MessageFoldTree
 import `fun`.hygames.kotlinutils.invoke
 import `fun`.hygames.kotlinutils.sendMessage
 import `fun`.hygames.kotlinutils.stringIfNotEmpty
@@ -24,21 +27,17 @@ class HKUNodesCommand : AbstractPlayerCommand {
         player: PlayerRef,
         world: World
     ) {
-        val string = StringBuilder()
+        val tree = MessageFoldTree("Nodes")
 
-        val nodes = HashMap<String, HashMap<String, ArrayList<String>>>() // Plugin -> Classes -> Nodes
+        HytaleKotlinUtils.logger(RunNodeManager.nodes.toString())
 
         for (entry in RunNodeManager.nodes) {
-            val node = entry.value
             val name = entry.key
+            val node = entry.value
             if (node.plugin == null || node.method == null) continue
 
             val plugin = node.plugin.name
             val clazz = node.method.declaringClass.simpleName
-
-            val classesToNodes = nodes.computeIfAbsent(plugin) { HashMap() }
-
-            val nodes = classesToNodes.computeIfAbsent(clazz) { ArrayList() }
 
             val invokeArguments = ArrayList<String>()
 
@@ -50,22 +49,12 @@ class HKUNodesCommand : AbstractPlayerCommand {
                 }
             }
 
-            nodes.add("$name, Params: ${node.method.parameterCount}${invokeArguments.stringIfNotEmpty { ", Args ${joinToString()}}" }}")
+            val nodeMessage = "$name, Params: ${node.method.parameterCount}${invokeArguments.stringIfNotEmpty { ", Args ${joinToString()}" }}"
+
+            tree.branch(plugin, clazz, nodeMessage)
         }
 
-        for (plugin in nodes) {
-            string.append("г  ${plugin.key}\n")
-            val classes = plugin.value
-            for (clazz in classes) {
-                string.append("|--  ${clazz.key}\n")
-                for (node in clazz.value) {
-                    string.append("|----  ${node}\n")
-                }
-
-            }
-        }
-
-        val result = string.toString()
+        val result = tree.buildString()
 
         HytaleKotlinUtils.logger(result)
 

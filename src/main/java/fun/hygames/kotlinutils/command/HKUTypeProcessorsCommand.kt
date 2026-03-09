@@ -9,6 +9,7 @@ import com.hypixel.hytale.server.core.universe.world.World
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore
 import `fun`.hygames.kotlinutils.HytaleKotlinUtils
 import `fun`.hygames.kotlinutils.codeInitialization.typeProcessor.TypeProcessors
+import `fun`.hygames.kotlinutils.internal.MessageFoldTree
 import `fun`.hygames.kotlinutils.invoke
 import `fun`.hygames.kotlinutils.sendMessage
 
@@ -23,34 +24,19 @@ class HKUTypeProcessorsCommand : AbstractPlayerCommand {
         player: PlayerRef,
         world: World
     ) {
-        val classes = HashMap<String, HashMap<String, List<String>>>() // Plugin -> TypeProcessor -> Classes
+        val tree = MessageFoldTree("TypeProcessors")
 
         for (entry in TypeProcessors.registeredByTypeProcessor){
-            val plugin = TypeProcessors.getPlugin(entry.key)!!.name
+            val typeProcessor = entry.key
+            val classes = entry.value
+            val plugin = TypeProcessors.getPlugin(typeProcessor)!!.name
 
-            val typeProcessor = classes.computeIfAbsent(plugin) { HashMap() }
-
-            typeProcessor[entry.key] =
-                entry.value.stream()
-                    .map{ clazz -> clazz.simpleName }
-                    .toList()
-        }
-
-        val string = StringBuilder()
-
-        for (plugin in classes) {
-            string.append("г  ${plugin.key}\n")
-            val typeProcessor = plugin.value
-            for (typeProcessor in typeProcessor) {
-                string.append("|--  ${typeProcessor.key}\n")
-                for (clazz in typeProcessor.value) {
-                    string.append("|----  ${clazz}\n")
-                }
-
+            for (clazz in classes) {
+                tree.branch("Plugin $plugin", "TypeProcessor \"$typeProcessor\"", "Class ${clazz.simpleName}")
             }
         }
 
-        val result = string.toString()
+        val result = tree.buildString()
 
         HytaleKotlinUtils.logger(result)
 

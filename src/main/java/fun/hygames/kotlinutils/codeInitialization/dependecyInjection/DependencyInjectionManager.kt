@@ -22,7 +22,11 @@ object DependencyInjectionManager {
         extraDependencyInjectionByInjector[injector]!![clazz.java] = parameterInjection
     }
 
-    internal fun getParameterInjection(clazz: Class<*>, inject: Inject) : ParameterInjection? {
+    internal fun getParameterInjection(clazz: Class<*>, inject: Inject?) : ParameterInjection? {
+        if (inject == null){
+            return dependencyInjectionByParameterClass[clazz]
+        }
+
         if (inject.injector.isBlank())
             return dependencyInjectionByParameterClass[clazz]
 
@@ -43,9 +47,9 @@ object DependencyInjectionManager {
             return@register pluginData.scheduler
         }
 
-        register(JavaPlugin::class) { node, _, _ -> node.plugin }
+        register(JavaPlugin::class) { node, _, _ -> return@register node.plugin }
 
-        register(HytaleLogger::class) { node, _, _ -> node.plugin!!.logger }
+        register(HytaleLogger::class) { node, _, _ -> return@register node.plugin!!.logger }
 
         register(PlayerRef::class) { _, _, args ->
             if (args.contains("_player")) return@register args["_player"]
