@@ -32,7 +32,7 @@ class HytaleKotlinUtils(@Nonnull init: JavaPluginInit) : JavaPlugin(init) {
         eventRegistry.register(BootEvent::class.java, ::boot)
     }
 
-    fun shutdown(event: ShutdownEvent){
+    fun shutdown(event: ShutdownEvent?){
         RunNodeManager.stopNode.run()
     }
 
