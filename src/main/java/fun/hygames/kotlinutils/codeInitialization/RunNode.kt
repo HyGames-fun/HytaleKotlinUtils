@@ -18,20 +18,26 @@ data class RunNode(
 ) {
     var subNodes: Int2ObjectOpenHashMap<ArrayList<RunNode>>? = null
 
+    var hasPositivePriority = false
+
     fun run() {
         if (subNodes == null) return
         val sorted = ArrayList(subNodes!!.keys)
 
-        sorted.sort()
-
-        // Positive
-        for (i in sorted) {
-            if (i < 0) continue
-            runMethods(i)
-        }
+        if (hasPositivePriority) {
+            sorted.sort()
+            // Positive
+            for (i in sorted) {
+                if (i < 0) continue
+                runMethods(i)
+            }
+        } else
+            sorted.sortDescending()
 
         // Negative
-        for (i in sorted.indices.reversed()) {
+        if (hasPositivePriority) sorted.reverse()
+
+        for (i in sorted) {
             val value = sorted[i]
             if (value >= 0) continue
             runMethods(value)
@@ -65,6 +71,10 @@ data class RunNode(
         }
 
         subNodes!![node.priority].add(node)
+
+        if (node.priority >= 0) {
+            hasPositivePriority = true
+        }
     }
 
     fun name() : String {
