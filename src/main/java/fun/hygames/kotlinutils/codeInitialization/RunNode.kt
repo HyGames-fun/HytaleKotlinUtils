@@ -37,7 +37,7 @@ data class RunNode(
         // Negative
         if (hasPositivePriority) sorted.reverse()
 
-        for (i in sorted) {
+        for (i in sorted.indices) {
             val value = sorted[i]
             if (value >= 0) continue
             runMethods(value)
