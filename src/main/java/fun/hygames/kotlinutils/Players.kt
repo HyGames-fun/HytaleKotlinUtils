@@ -31,10 +31,13 @@ val PlayerRef.world : World?
         return Universe.get().getWorld(this.worldUuid!!)
     }
 
-fun PlayerRef.sendMessage(message: String){
+@Suppress("NOTHING_TO_INLINE")
+inline fun PlayerRef.sendMessage(message: String){
     sendMessage(Message.raw(message))
 }
-fun Player.sendMessage(message: String){
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Player.sendMessage(message: String){
     sendMessage(Message.raw(message))
 }
 
