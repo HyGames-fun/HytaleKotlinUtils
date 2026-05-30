@@ -66,3 +66,7 @@ tasks.shadowJar {
 tasks.build {
     dependsOn(tasks.shadowJar)
 }
+
+java {
+    withSourcesJar()
+}
