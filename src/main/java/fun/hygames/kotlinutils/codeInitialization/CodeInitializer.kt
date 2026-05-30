@@ -9,6 +9,7 @@ import `fun`.hygames.kotlinutils.Scheduler
 import `fun`.hygames.kotlinutils.codeInitialization.typeProcessor.MissingTypeProcessorException
 import `fun`.hygames.kotlinutils.codeInitialization.typeProcessor.TypeProcessors
 import `fun`.hygames.kotlinutils.internal.ErrorReport
+import `fun`.hygames.kotlinutils.internal.InitializationTimeTracker
 import `fun`.hygames.kotlinutils.internal.ReflectionUtils
 import `fun`.hygames.kotlinutils.invoke
 import java.lang.reflect.Method
@@ -40,12 +41,15 @@ object CodeInitializer {
 
     private fun initialize(){
         infoLogger("Initializing...")
+        InitializationTimeTracker("Initialize")
 
         val classesOfPlugins = Array<ArrayList<Class<*>>>(pluginInstances.size) { ArrayList() } // Plugins -> Classes of plugin
 
         try {
+            InitializationTimeTracker("ClassLoad")
             for (i in 0..<pluginInstances.size) {
                 val plugin = pluginInstances[i]
+                InitializationTimeTracker("ClassLoad:${plugin.name}")
                 val pluginPackage = plugin::class.java.packageName
                 val classes = classesOfPlugins[i]
 
@@ -57,10 +61,14 @@ object CodeInitializer {
                     .forEach { classes.add(it.load()) }
 
                 infoLogger("Loaded ${classes.size} classes in ${plugin.name}")
+                InitializationTimeTracker("ClassLoad:${plugin.name}")
             }
+            InitializationTimeTracker("ClassLoad")
 
+            InitializationTimeTracker("ClassProcessing")
             for (i in 0..<pluginInstances.size){
                 val plugin = pluginInstances[i]
+                InitializationTimeTracker("ClassProcessing:${plugin.name}")
 
                 for (clazz in classesOfPlugins[i]) {
                     try {
@@ -71,17 +79,25 @@ object CodeInitializer {
                         e.printStackTrace()
                     }
                 }
+                InitializationTimeTracker("ClassProcessing:${plugin.name}")
             }
+            InitializationTimeTracker("ClassProcessing")
 
             infoLogger("Linking nodes...")
+            InitializationTimeTracker("NodeLinking")
             RunNodeManager.linkNodes()
+            InitializationTimeTracker("NodeLinking")
 
             infoLogger("Run nodes...")
+            InitializationTimeTracker("RunNodes")
             RunNodeManager.startNode.run()
+            InitializationTimeTracker("RunNodes")
 
         } catch (e: Exception) {
             e.printStackTrace()
         }
+
+        InitializationTimeTracker("Initialize")
     }
 
     private fun processRegister(clazz: Class<*>, plugin: JavaPlugin){

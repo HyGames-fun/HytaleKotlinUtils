@@ -1,6 +1,3 @@
-import org.jetbrains.gradle.ext.runConfigurations
-import org.jetbrains.gradle.ext.settings
-
 plugins {
     id("org.jetbrains.gradle.plugin.idea-ext") version "1.4"
     kotlin("jvm") version "2.3.0"
@@ -69,5 +66,3 @@ tasks.shadowJar {
 tasks.build {
     dependsOn(tasks.shadowJar)
 }
-
-

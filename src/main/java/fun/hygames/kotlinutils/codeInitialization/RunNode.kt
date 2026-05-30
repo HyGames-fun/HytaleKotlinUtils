@@ -1,12 +1,13 @@
 package `fun`.hygames.kotlinutils.codeInitialization
 
 import com.hypixel.hytale.server.core.plugin.JavaPlugin
-import `fun`.hygames.kotlinutils.internal.MethodUtil.ktInvoke
 import `fun`.hygames.kotlinutils.codeInitialization.dependecyInjection.DependencyInjectionManager
 import `fun`.hygames.kotlinutils.codeInitialization.dependecyInjection.Inject
-import `fun`.hygames.kotlinutils.codeInitialization.dependecyInjection.ParameterInjection
 import `fun`.hygames.kotlinutils.internal.ErrorReport
+import `fun`.hygames.kotlinutils.internal.MethodUtil.ktInvoke
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
+import java.lang.foreign.Arena
+import java.lang.foreign.Linker
 import java.lang.reflect.Method
 
 data class RunNode(
@@ -19,20 +20,26 @@ data class RunNode(
 ) {
     var subNodes: Int2ObjectOpenHashMap<ArrayList<RunNode>>? = null
 
+    var hasPositivePriority = false
+
     fun run() {
         if (subNodes == null) return
         val sorted = ArrayList(subNodes!!.keys)
 
-        sorted.sort()
-
-        // Positive
-        for (i in sorted) {
-            if (i < 0) continue
-            runMethods(i)
-        }
+        if (hasPositivePriority) {
+            sorted.sort()
+            // Positive
+            for (i in sorted) {
+                if (i < 0) continue
+                runMethods(i)
+            }
+        } else
+            sorted.sortDescending()
 
         // Negative
-        for (i in sorted.indices.reversed()) {
+        if (hasPositivePriority) sorted.reverse()
+
+        for (i in sorted.indices) {
             val value = sorted[i]
             if (value >= 0) continue
             runMethods(value)
@@ -66,10 +73,16 @@ data class RunNode(
         }
 
         subNodes!![node.priority].add(node)
+
+        if (node.priority >= 0) {
+            hasPositivePriority = true
+        }
     }
 
-    fun name() : String{
-        return plugin!!.name + ":" + method!!.declaringClass.simpleName + ":" + method.name
+    fun name() : String {
+        if (plugin == null) return ""
+        if (method == null) return ""
+        return plugin.name + ":" + method.declaringClass.simpleName + ":" + method.name
     }
 
     val pluginData : CodeInitializer.PluginData
@@ -114,19 +127,16 @@ data class RunNode(
             val type = parametersTypes[i]
             val inject = parameters[i].getAnnotation(Inject::class.java)
 
-            var parameterInjection: ParameterInjection?
-
-            try {
-                 parameterInjection = DependencyInjectionManager.getParameterInjection(type, inject) ?: continue
+            val parameterInjection = try {
+                DependencyInjectionManager.getParameterInjection(type, inject) ?: continue
             } catch (e: Exception){
-                ErrorReport("Injection error in node ${name()}. Message: \"${e.message!!}\"")
+                ErrorReport("Injection error in node ${name().ifBlank { "Undefined" }}. Message: \"${e.message}\"")
                 e.printStackTrace()
                 continue
             }
 
             args[i] = parameterInjection.inject(this, parameters[i], arguments)
         }
-
         return args
     }
 }
