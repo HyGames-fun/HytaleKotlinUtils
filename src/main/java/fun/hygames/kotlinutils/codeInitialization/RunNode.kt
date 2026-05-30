@@ -6,6 +6,8 @@ import `fun`.hygames.kotlinutils.codeInitialization.dependecyInjection.Inject
 import `fun`.hygames.kotlinutils.internal.ErrorReport
 import `fun`.hygames.kotlinutils.internal.MethodUtil.ktInvoke
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
+import java.lang.foreign.Arena
+import java.lang.foreign.Linker
 import java.lang.reflect.Method
 
 data class RunNode(

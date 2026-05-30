@@ -36,10 +36,13 @@ inline fun PlayerRef.sendMessage(message: String){
     sendMessage(Message.raw(message))
 }
 
-@Suppress("NOTHING_TO_INLINE")
-inline fun Player.sendMessage(message: String){
-    sendMessage(Message.raw(message))
-}
+//@Suppress("NOTHING_TO_INLINE")
+//inline fun Player.sendMessage(message: String){
+//    sendMessage(Message.raw(message))
+//    this.playerRef
+//
+//    this.
+//}
 
 inline operator fun PlayerRef.invoke(crossinline body : (World) -> Unit){
     val world = this.world ?: return
