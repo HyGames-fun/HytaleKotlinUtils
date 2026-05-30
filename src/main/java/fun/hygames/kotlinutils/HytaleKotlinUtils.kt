@@ -10,6 +10,7 @@ import `fun`.hygames.kotlinutils.codeInitialization.RunNodeManager
 import `fun`.hygames.kotlinutils.codeInitialization.typeProcessor.TypeProcessors
 import `fun`.hygames.kotlinutils.codeInitialization.typeProcessor.builtin.*
 import `fun`.hygames.kotlinutils.internal.ErrorReport
+import `fun`.hygames.kotlinutils.internal.InitializationTimeTracker
 import `fun`.hygames.kotlinutils.internal.PluginsCounter
 import javax.annotation.Nonnull
 
@@ -37,6 +38,7 @@ class HytaleKotlinUtils(@Nonnull init: JavaPluginInit) : JavaPlugin(init) {
     }
 
     fun boot(event: BootEvent?){
+        InitializationTimeTracker.printResults()
         ErrorReport.log()
     }
 

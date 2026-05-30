@@ -43,16 +43,16 @@ var TransformComponent.z : Double
 
 
 var TransformComponent.pitch : Float
-    inline get() = rotation.pitch
-    inline set(value) { rotation.pitch = value }
+    inline get() = rotation.y
+    inline set(value) { rotation.y = value }
 
 var TransformComponent.yaw : Float
-    inline get() = rotation.yaw
-    inline set(value) { rotation.yaw = value }
+    inline get() = rotation.z
+    inline set(value) { rotation.z = value }
 
 var TransformComponent.roll : Float
-    inline get() = rotation.roll
-    inline set(value) { rotation.roll = value }
+    inline get() = rotation.x
+    inline set(value) { rotation.x = value }
 
 val ENTITY_STAT_MAP
     inline get() = EntityStatMap.getComponentType()!!
